@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
                   topRight: Radius.circular(30),
                 ),
               ),
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(19),
               child: SingleChildScrollView(
                 child: Column(
                   children: [

@@ -31,8 +31,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
         children: _pages,
       ), // Show selected page
       bottomNavigationBar: NavigationBar(
-        height: 80,
-        elevation: 20,
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
           setState(() {

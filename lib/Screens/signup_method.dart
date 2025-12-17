@@ -29,7 +29,7 @@ class SignupMethod extends StatelessWidget {
                   topRight: Radius.circular(30),
                 ),
               ),
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(19),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:provider/provider.dart';
-import 'package:ecommerce/Services/wishList_provider.dart';
-import 'package:ecommerce/models/products.dart';
-import 'package:ecommerce/Services/product_services.dart';
-import 'package:ecommerce/Widgets/product_list.dart';
+
+import 'package:ecommerce/blocs/products_cubit.dart';
+import 'package:ecommerce/blocs/wishlist_cubit.dart';
+import 'package:ecommerce/ui/app_pill_button.dart';
+import 'package:ecommerce/ui/screen_padding.dart';
+import 'package:ecommerce/Widgets/product_grid.dart';
 
 class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final wishlistProvider = Provider.of<WishlistProvider>(context);
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -25,35 +25,70 @@ class WishlistScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: FutureBuilder<List<Products>>(
-          future: ProductServices().fetchProducts(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+        body: BlocBuilder<ProductsCubit, ProductsState>(
+          builder: (context, productsState) {
+            if (productsState is ProductsLoading ||
+                productsState is ProductsInitial) {
+              return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError) {
-              return Center(child: Text('Error loading wishlist'));
+            if (productsState is ProductsFailure) {
+              return const Center(child: Text('Error loading wishlist'));
             }
-
-            final allProducts = snapshot.data ?? [];
-            final wishlistItems =
-                allProducts
-                    .where(
-                      (product) =>
-                          wishlistProvider.wishlist.contains(product.id),
-                    )
-                    .toList();
-
-            if (wishlistItems.isEmpty) {
-              return Center(child: Text("Your wishlist is empty."));
+            if (productsState is! ProductsLoaded) {
+              return const SizedBox.shrink();
             }
 
-            return SingleChildScrollView(
-              child: ProductList(
-                products: wishlistItems,
-                wishlist: wishlistProvider.wishlist,
-                onWishlistToggle: wishlistProvider.toggleWishlist,
-              ),
+            return BlocBuilder<WishlistCubit, WishlistState>(
+              builder: (context, wishlistState) {
+                final allProducts = productsState.products;
+                final wishlistItems =
+                    allProducts
+                        .where((product) => wishlistState.contains(product.id))
+                        .toList();
+
+                if (wishlistItems.isEmpty) {
+                  return ScreenPadding(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Iconsax.heart, size: 54, color: Colors.black26),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Your wishlist is empty',
+                            style: Theme.of(context).textTheme.titleLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Save items you love to find them quickly later.',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.black54),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          AppPillButton.filled(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(Iconsax.shop, size: 18),
+                            label: const Text('Browse products'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return ScreenPadding(
+                  child: CustomScrollView(
+                    slivers: [
+                      ProductGridSliver(products: wishlistItems),
+                      const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                    ],
+                  ),
+                );
+              },
             );
           },
         ),

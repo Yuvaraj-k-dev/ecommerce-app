@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:ecommerce/models/products.dart';
 
+import 'package:ecommerce/ui/product_image.dart';
+
 class RandomImage extends StatefulWidget {
   final List<Products> products;
 
@@ -38,11 +40,12 @@ class _RandomImageState extends State<RandomImage> {
             borderRadius: BorderRadius.circular(30),
             child:
                 _randomProductImage != null
-                    ? Image.network(
-                      _randomProductImage!,
+                    ? ProductImage(
+                      url: _randomProductImage!,
                       height: 200,
                       width: 350,
                       fit: BoxFit.contain,
+                      memCacheWidth: 900,
                     )
                     : Container(
                       height: 200,
